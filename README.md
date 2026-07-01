@@ -142,10 +142,6 @@ Steps, in order:
 pass before a pull request can be merged. Configured under
 **Settings → Branches → Branch protection rules** on GitHub.
 
-## Team
-
-*(Add team member names and roles here — e.g. Backend Lead, DevOps Lead,
-Frontend Lead, QA/Docs Lead — per the group assessment requirement.)*
 
 ## Project Board
 
