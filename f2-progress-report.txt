@@ -1,0 +1,13 @@
+Progress Report — Formative 2: CI Pipeline for a Containerized Application
+
+Main Challenges
+
+The biggest challenge was getting the Docker setup to match how the application actually expects its configuration. The Flask app reads its database connection from a DATABASE_URL environment variable, so the Dockerfile and docker-compose.yml both had to be written to match that exactly — a mismatch here (e.g. wrong service name in the connection string) would cause the app container to fail silently or crash on startup. Getting the non-root user permissions right in the Dockerfile was another point of care: the app needs to own its working directory before switching away from root, or file operations fail inside the container. Configuring the CI pipeline's trigger rules also took some attention — GitHub Actions distinguishes branches-ignore (for excluding main from push triggers) from branches (for restricting pull_request triggers to main), and getting these backwards would have meant CI either never running or running on the wrong events.
+
+What We Learned About Docker and CI
+
+Containerizing the app made clear why base image choice matters: using a pinned, slim image (python:3.11-slim) instead of the full default image keeps the build reproducible and the final image smaller, which matters for both security and deploy speed. Working through docker-compose also clarified the difference between build-time configuration (what's baked into the image) and run-time configuration (environment variables injected at container start) — the database credentials, for example, live entirely in docker-compose.yml rather than the Dockerfile, so they can be changed without rebuilding the image. On the CI side, the main lesson was about failing fast: structuring the pipeline so linting and testing run before the (much slower) Docker build step means bad code gets flagged in seconds rather than minutes, and a genuinely broken build never reaches the point of producing a Docker image at all.
+
+Significant Changes From Formative 1
+
+The application logic itself is unchanged from F1 — the core price-reporting and price-browsing features work exactly as they did. What's new is the operational layer around it: the app now runs inside a container rather than directly on a host machine, it has an automated pipeline that checks code quality and correctness on every push, and merges into main are gated behind that pipeline passing rather than being pushed directly. This is the first point in the project where "it works on my machine" stops being sufficient — the CI pipeline enforces that the app also builds and passes its checks in a clean, consistent environment before it's allowed anywhere near main.
