@@ -1,0 +1,53 @@
+# ----------------------------------------------------------------------------
+# Soko Bora - Docker Compose configuration
+# ----------------------------------------------------------------------------
+# Local dev: docker-compose up --build
+# App will be available at http://localhost:5000
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soko-bora-web
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      # Matches app/main.py's DATABASE_URL lookup. Points at the `db`
+      # service below by its service name (Docker's internal DNS).
+      - DATABASE_URL=postgresql://sokobora:sokobora_pw@db:5432/sokobora_db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - soko-bora-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: soko-bora-db
+    environment:
+      - POSTGRES_USER=sokobora
+      - POSTGRES_PASSWORD=sokobora_pw
+      - POSTGRES_DB=sokobora_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - soko-bora-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sokobora -d sokobora_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - soko-bora-network
+    restart: unless-stopped
+
+networks:
+  soko-bora-network:
+    driver: bridge
+
+volumes:
+  soko-bora-db-data:

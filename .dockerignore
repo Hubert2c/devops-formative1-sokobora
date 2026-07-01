@@ -1,0 +1,39 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Test / coverage artifacts
+htmlcov/
+.coverage
+.tox/
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# Local DB files
+*.db
+instance/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docs / tests (not needed inside the running container)
+*.md
+tests/

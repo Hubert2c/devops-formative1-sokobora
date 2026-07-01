@@ -57,7 +57,31 @@ across markets in their region.
 └── README.md
 ```
 
-## Running Locally
+## Running Locally with Docker Compose (recommended)
+
+The whole stack — app + PostgreSQL — starts with a single command:
+
+```bash
+docker-compose up --build
+```
+
+This builds the app image from the `Dockerfile`, starts a PostgreSQL
+container, and connects them over an internal Docker network. The API
+will be available at **http://localhost:5000**.
+
+Stop everything with:
+
+```bash
+docker-compose down
+```
+
+To also wipe the persisted database volume:
+
+```bash
+docker-compose down -v
+```
+
+## Running Locally without Docker
 
 ```bash
 python -m venv venv
@@ -65,6 +89,10 @@ source venv/bin/activate
 pip install -r requirements-dev.txt
 python app/main.py
 ```
+
+Without Docker, the app defaults to a local SQLite file
+(`soko_bora.db`) unless you set a `DATABASE_URL` environment variable
+pointing at a PostgreSQL instance.
 
 The API will be available at `http://localhost:5000`.
 
@@ -89,6 +117,30 @@ curl "http://localhost:5000/api/prices?region=Kigali"
 pytest tests/ -v
 flake8 app tests --max-line-length=100
 ```
+
+## CI Pipeline
+
+The pipeline (`.github/workflows/ci.yml`) triggers on:
+- Pushes to any branch **except** `main`
+- Pull requests targeting `main`
+
+Steps, in order:
+1. Checkout code
+2. Set up Python 3.11
+3. Install dependencies
+4. Lint with flake8 (**fails the build on lint errors**)
+5. Run tests with pytest, using an in-memory SQLite DB (**fails the
+   build on any test failure**)
+6. Build the Docker image (**fails the build if the image doesn't
+   build**)
+7. Spin up a real Postgres container and smoke-test the built image
+   against it by hitting `/health`
+
+## Branch Protection
+
+`main` requires the CI check (`Lint, Test, and Build Docker Image`) to
+pass before a pull request can be merged. Configured under
+**Settings → Branches → Branch protection rules** on GitHub.
 
 ## Team
 
