@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Database
+*.db
+soko_bora.db
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
